@@ -6,7 +6,7 @@ export default function createNFakeProducts(n = 5) {
 		products.push({
 			id: faker.database.mongodbObjectId(),
 			name: faker.commerce.product(),
-			price: faker.commerce.price(700, 10000, 0, "$"),
+			price: faker.commerce.price(10000, 20000, 0, "$"),
 			thumbnail: faker.image.food(640, 480, true),
 		})
 	}

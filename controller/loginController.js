@@ -1,59 +1,44 @@
-const express = require("express")
-const session = require("express-session")
-const MongoStore = require("connect-mongo")
+export const loginController = {
+  auth: (req, res, next) => {
+    if (req.session.username != undefined) {
+      return next();
+    }
+    return res.status(401).render("pages/errorLogin");
+  },
+  get: (req, res) => {
+    try {
+      if (req.session.username != undefined) {
+        res.render("pages/home", { name: req.session.username });
+      } else {
+        res.render("pages/login");
+      }
+    } catch (error) {
+      return res
+        .status(500)
+        .send({ status: "Get page Log In error", body: error });
+    }
+  },
+  postLogin: (req, res) => {
+    try {
+      const { username } = req.body;
+      req.session.username = username;
 
-const app = express()
+      res.redirect("/home");
+    } catch (error) {
+      return res.status(500).send({ status: "Log In error", body: error });
+    }
+  },
+};
 
-app.use(
-	session({
-		store: MongoStore.create({
-			mongoUrl:
-				"mongodb+srv://fedeUsername:Mongo.0303@cluster0.0kdfdvp.mongodb.net/?retryWrites=true&w=majority",
-			mongoOptions: {
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
-			},
-		}),
+// if (req.session?.user === "fran" && req.session?.admin) {
+//   return next();
+// }
 
-		secret: "secreto",
-		resave: false,
-		saveUninitialized: false,
-		cookie: {
-			maxAge: 600,
-			expires: 600,
-		},
-	})
-)
-
-app.get("/root", (req, res) => {
-	res.send("<h1>Te damos la bienvenida!</h1>")
-})
-
-app.get("/root/:name", (req, res) => {
-	let { name } = req.params
-
-	if (!req.session[name]) {
-		req.session[name] = {}
-		req.session[name].name = name
-		req.session[name].cantidadDeLogins = 1
-	} else {
-		req.session[name].cantidadDeLogins += 1
-	}
-
-	res.send(
-		`<h1>Te damos la bienvenida ${name}! Visitaste ${req.session[name].cantidadDeLogins} veces</h1>`
-	)
-})
-
-app.get("/olvidar", (req, res) => {
-	req.session.destroy((error) => {
-		if (error) {
-			res.json({ status: "Logout ERROR" })
-		}
-		res.send("Logout OK")
-	})
-})
-
-app.listen(8080, () => {
-	console.log("Servidor escuchando en el puerto 8080")
-})
+// const { username, password } = req.body;
+// if (username !== "fran" || password !== "123") {
+//   return res.render("pages/errorLogin");
+// }
+// req.session.admin = true;
+// var time = 600000;
+// // req.session.cookie.expires = new Date(Date.now() + time);
+// req.session.cookie.maxAge = new Date(Date.now() + time);
